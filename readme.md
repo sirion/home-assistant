@@ -9,17 +9,25 @@ Can be used for webcam-images.
 
 ### Use
 
-In Home Assistant to `Settings` -> `Dashboards` and click the three dots on the upper right corner.
-Choose `Resources`, then click on the button `Add resource` in the lower right corner.
-In the field named `URL`, enter "https://sirion.github.io/home-assistant/cards/live-image/live-image.js".
-For `Resource type` choose "Javascript module".
-Click `Create`.
+In Home Assistant 
+
+- Go to `Settings` -> `Dashboards`
+- Click the three dots on the upper right corner
+- Choose `Resources`
+- Click on the button `Add resource` in the lower right corner
+- In the field named `URL`, enter "https://sirion.github.io/home-assistant/cards/live-image/live-image.js"
+- For `Resource type` choose "Javascript module".
+- Click `Create`.
 
 ![Add Resource](doc/live-image-add-resource.jpg)
 
-Alternatively, you can copy the `live-image.js`-file to your home assistant's "www"-directory and use the path `/local/live-image.js`.
+You can now add the card named "Live Image" anywhere.
+
+*(Alternatively, you can copy the `live-image.js`-file to your home assistant's "www"-directory and use the path `/local/live-image.js`.)*
 
 ### Configuration
+
+You can use the visual editor.
 
 Configuration options:
 
@@ -46,7 +54,7 @@ tap_action:
 ### About `useTimestamp`
 
 If this is not specified as `true`, the browser should honor the caching rules sent by the server.
-This should result in much less traffic if the server is correctly configured, as the browser sends a conditional request, that should only return the full image data if the file has changed since the last request.
+This should result in much less traffic if the server is correctly configured. As the browser sends a conditional request, that should only return the full image data if the file has changed since the last request.
 
 ## TODOs
 
