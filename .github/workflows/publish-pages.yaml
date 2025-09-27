@@ -1,0 +1,42 @@
+name: Publish to Github Pages
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Create Live-Image
+        run: |
+          mkdir -p target/img
+          sudo apt-get install imagemagick
+          convert -size 300x200 -fill '#ffffff' -background '#00000099' -gravity center label:"Last Update:\n$(date +'%d.%m.%Y\n%H:%M') (UTC)" target/img/live-image.png
+
+      - name: Copy files
+        run: |
+          mkdir -p target/cards/live-image
+          cp cards/live-image/live-image.js target/cards/live-image/live-image.js
+          echo "<!DOCTYPE html><style>html { background: #666; }</style><p>Hi :)</p><img src='img/live-image.png' />" > target/index.html
+
+      - name: Upload Github Pages Artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: target/
+
+      - name: Publish to Github Pages
+        uses: actions/deploy-pages@v4.0.0
