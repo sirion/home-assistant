@@ -1,11 +1,22 @@
 
 class LiveImage extends HTMLElement {
 
-	refreshCounter = 0;
+	_refreshCounter = 0;
+	_refreshTime = 300; // Default 5m
 
 	setConfig(config) {
 		if (!this.img) {
 			this.img = this._createImg();
+			document.addEventListener("visibilitychange", e => {
+				if (!document.hidden) {
+					// Document is shown again. Make sure we have refreshed.
+					const refreshDelta = Date.now() - this._refreshCounter;
+					if (refreshDelta > this._refreshTime * 1000) {
+						this.startRefresh();
+						this.refresh();
+					}
+				}
+			});
 		}
 		this.append(this.img);
 
@@ -17,16 +28,6 @@ class LiveImage extends HTMLElement {
 		if (this.config.url) {
 			this.img.src = this.useTimestamp ? this.addTimestampQuery(this.config.url) : this.config.url;
 		}
-		
-		clearInterval(this._refreshInterval);
-		if (this.config.refresh) {
-			let refresh = Math.max(10, this.config.refresh); // Do not allow refresh < 10s
-			if (isNaN(refresh)) {
-				refresh = 60 * 5; // Default 5m
-			}
-
-			setInterval(this.refresh.bind(this), refresh * 1000)
-		}
 
 		if (this.config.height) {
 			this.style.height = config.height;
@@ -34,6 +35,16 @@ class LiveImage extends HTMLElement {
 		if (this.config.width) {
 			this.style.width = config.width;
 		}
+
+		if (this.config.refresh) {
+			this._refreshTime = Math.max(10, this.config.refresh); // Do not allow refresh < 10s
+			if (isNaN(this._refreshTime)) {
+				this._refreshTime = 60 * 5; // Default 5m
+			}
+
+		}
+		this.startRefresh();
+		this.refresh();
 	}
 
 	_createImg() {
@@ -52,8 +63,13 @@ class LiveImage extends HTMLElement {
 		}
 	}
 
+	startRefresh() {
+		clearInterval(this._refreshInterval);
+		setInterval(this.refresh.bind(this), this._refreshTime * 1000)
+	}
+
 	refresh() {
-		this.refreshCounter++;
+		this._refreshCounter = Date.now();
 		if (this.useTimestamp) {
 			this.img.src = this.addTimestampQuery(this.img.src);
 		} else {
@@ -67,7 +83,7 @@ class LiveImage extends HTMLElement {
 					cache: "default"
 				}).catch(e => { /* ignore error */ });
 			}
-			this.img.src = this.config.url + "#" + this.refreshCounter;
+			this.img.src = this.config.url + "#" + this._refreshCounter;
 		}
 	}
 
@@ -75,7 +91,7 @@ class LiveImage extends HTMLElement {
 
 
 	///// Graphic Configuration
-
+	
 	static getStubConfig() {
 		return {
 			url: "https://sirion.github.io/home-assistant/img/live-image.png",
@@ -127,7 +143,7 @@ window.customCards = window.customCards || [];
 window.customCards.push({
 	type: "live-image",
 	name: "Live Image",
-	preview: true,
+	preview: true, // Optional - defaults to false
 	description: "Image that is refreshed automatically",
 	documentationURL: "https://github.com/sirion/home-assistant/",
 });
